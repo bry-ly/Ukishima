@@ -74,10 +74,11 @@ Singleton {
     //* load-bearing: GameMode.enter() writes them and leave() reads them back, so
     //* dropping one does not throw -- the desktop just stays quiet after a game
     //* because the pre-game value was never restored. They look identical to
-    //* gamePrevProfile below, which nothing reads, so a pass that prunes "unused
-    //* flags" is one line away from taking the block with it. Prune per flag, never
-    //* as a group. gamePrevProfile stays as the reserved slot for restoring the
-    //* power profile, which game mode does not yet touch.
+    //* gamePrevProfile below, which a pass that prunes "unused flags" could take
+    //* for dead, so it is one line away from taking the block with it. Prune per
+    //* flag, never as a group. gamePrevProfile holds the power profile (as a
+    //* string-encoded PowerProfile value) that game mode replaced with
+    //* Performance; "" means game mode did not change it.
     property alias gamePrevDnd: adapter.gamePrevDnd
     property alias gamePrevViz: adapter.gamePrevViz
     property alias gamePrevAwake: adapter.gamePrevAwake
@@ -95,6 +96,8 @@ Singleton {
         property alias lockShowWifi: adapter.lockShowWifi
         //* Session lock: show the battery indicator on lockscreen/LockSurface.qml.
         property alias lockShowBattery: adapter.lockShowBattery
+        //* Session lock: show the media player card under the clock on lockscreen/LockSurface.qml.
+        property alias lockShowMedia: adapter.lockShowMedia
         //* Session lock: how hard the captured desktop is blurred behind the lock.
         property alias lockBlur: adapter.lockBlur
         //* Session lock: "capture" grim-captures the desktop at lock time and blurs it, "wallpaper" uses the live wallpaper, "solid" paints an opaque backdrop.
@@ -204,6 +207,8 @@ Singleton {
             property bool lockShowWifi: true
             //* Session lock: show the battery indicator on lockscreen/LockSurface.qml.
             property bool lockShowBattery: true
+            //* Session lock: show the media player card under the clock on lockscreen/LockSurface.qml.
+            property bool lockShowMedia: true
             //* Session lock: how hard the captured desktop is blurred behind the lock.
             property int lockBlur: 64
             //* Session lock: "capture" grim-captures the desktop at lock time and blurs it, "wallpaper" uses the live wallpaper, "solid" paints an opaque backdrop.
