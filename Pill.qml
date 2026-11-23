@@ -2430,7 +2430,7 @@ Item {
 
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        s: pill.s
+                        s: pill.s * 0.88
                         shimmerOn: !Flags.reduceMotion
                     }
                 }
