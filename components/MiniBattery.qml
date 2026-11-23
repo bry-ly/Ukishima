@@ -141,7 +141,9 @@ Item {
         }
 
         Text {
-            anchors.centerIn: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: 0.8 * root.s
             visible: !root.charging
             z: 2
             text: root.pct + ""
@@ -177,6 +179,7 @@ Item {
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: 0.8 * chargeRow.u
             text: chargeRow.value + ""
             color: chargeRow.tint
             font.family: Theme.font
