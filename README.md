@@ -2,7 +2,7 @@
 
 > A Quickshell desktop shell for Hyprland and niri.
 
-Ukishima (浮島, *"floating island"*) puts a pill at the top of every monitor and a dock along the bottom. The pill expands in place into surfaces — launcher, media, settings and the rest — rather than opening separate panels. It is a self-contained Quickshell config and does not edit your compositor files.
+Ukishima (浮島, *"floating island"*) puts a pill at the top of every monitor and a dock along the bottom. The pill expands in place into surfaces — launcher, media and the rest — rather than opening separate panels. Settings are the exception: they open as a centred floating window with a grouped sidebar, and the pill stays visible above it so changes can be previewed live. It is a self-contained Quickshell config and does not edit your compositor files.
 
 ## Preview
 
@@ -16,9 +16,10 @@ Explore the animated showcase, features and settings on the [Ukishima website](h
 
 ## Features
 
-- **Pill** — one per monitor. Hovering expands it into a row of modules; surfaces open from the pill and fold back into it when dismissed. Right-clicking the pill cycles through the media surface, the timer, and up to two more surfaces chosen under **Settings → Interface → Right-click**.
+- **Pill** — one per monitor. Hovering expands it into a row of modules; surfaces open from the pill and fold back into it when dismissed. Right-clicking the pill cycles through the media surface, the timer, and up to two more surfaces chosen under **Settings → Right-click**.
 - **Dock** — pinned and running apps, hover magnification, window previews, auto-hide, and its own theme.
-- **Surfaces** — launcher, emoji, weather, calendar, media player, mixer, wallpaper browser and Wallhaven search, screen recorder, clipboard, Wi-Fi, Bluetooth, battery, power menu, system monitor, scratchpad and settings.
+- **Settings** — a centred floating window opened from the pill's cog (or `qs ipc call ukishima settings ""`). Seven grouped categories — Bar & Island, Appearance, Motion, Interface, Lock Screen, Dock and System — sit in a search-first sidebar, while grouped cards, sliders and back/forward page history handle the content; every change applies live on the pill above.
+- **Surfaces** — launcher, emoji, weather, calendar, media player, mixer, wallpaper browser and Wallhaven search, screen recorder, clipboard, Wi-Fi, Bluetooth, battery, power menu, system monitor and scratchpad.
 - **Surface styles** — the pill, media player, mixer, system monitor, scratchpad and lock screen each offer several layouts, under **Settings → Appearance → Surface Styles**.
 - **Wallpapers** — shuffled image wallpapers through `awww`, video wallpapers through `mpvpaper`, a cover/contain/stretch/center fit, and a palette taken from the current wallpaper.
 - **Compositor-aware** — workspaces, window state, keyboard layout, lock backends and dependency checks follow Hyprland or niri. Hyprland-only features are hidden on niri.
