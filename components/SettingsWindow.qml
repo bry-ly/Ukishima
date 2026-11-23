@@ -892,26 +892,6 @@ Item {
                 anchors.bottomMargin: 14 * root.s
                 height: 20 * root.s
 
-                Row {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 8 * root.s
-
-                    Rectangle {
-                        width: 6 * root.s
-                        height: width
-                        radius: width / 2
-                        color: Theme.vermLit
-                        opacity: 0.75
-                    }
-                    Text {
-                        text: "Changes apply live"
-                        color: Theme.faint
-                        font.family: Theme.font
-                        font.pixelSize: 10 * root.s
-                    }
-                }
-
                 Item {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
