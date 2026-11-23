@@ -8,8 +8,8 @@ import "../Singletons"
  * The lock runs in a separate process, so its copy bakes UPower access, sizes
  * and colours. This shared component keeps the same artwork for the pill's
  * Status face: a rounded 35%-ink shell, a green fill (red at or below 20%)
- * with the percentage inside, a bolt + percentage row while charging, and the
- * sliding shadcn sheen. The lockscreen copy remains the source of the
+ * with the percentage inside, a bolt + percentage row while charging, and a
+ * sliding glint across the body. The lockscreen copy remains the source of the
  * geometry; keep the two in sync by hand.
  */
 Item {
@@ -70,15 +70,17 @@ Item {
             Behavior on color { ColorAnimation { duration: 300 } }
         }
 
-        //* Charging overlay: % + bolt under the lockscreen's sheen. The plain
-        //* percentage below takes over when unplugged or full.
+        //* Charging overlay: % + bolt, kept at full opacity so the number
+        //* stays legible. The glow below is a separate body sweep rather than
+        //* the lockscreen's text-only dim/bright sheen, which had to drop the
+        //* base row to 55% opacity to be visible.
         Item {
             id: chargeShimmer
 
             anchors.centerIn: parent
             width: chargeBase.implicitWidth
             height: chargeBase.implicitHeight
-            visible: root.charging && root.showPercent
+            visible: root.sheenActive && root.charging && root.showPercent
             z: 2
 
             ChargeRow {
@@ -88,59 +90,44 @@ Item {
                 u: root.s
                 value: root.pct
                 tint: root.inkColor
-                opacity: root.sheenActive ? 0.95 : 1
             }
+        }
 
-            Item {
-                id: sheenMover
+        Item {
+            id: sheenClip
 
-                readonly property real coreWidth: Math.max(10 * root.s, chargeShimmer.width * 0.3)
+            anchors.fill: parent
+            clip: true
+            visible: root.sheenActive && root.charging
+            z: 3
 
-                width: Math.max(20 * root.s, chargeShimmer.width * 0.6)
-                height: chargeShimmer.height
-                visible: root.sheenActive
+            Rectangle {
+                id: sheenBand
 
-                Item {
-                    anchors.fill: parent
-                    clip: true
+                property real sweepX: -width
 
-                    ChargeRow {
-                        y: (chargeShimmer.height - height) / 2
-                        x: (chargeShimmer.width - implicitWidth) / 2 - sheenMover.x
-                        u: root.s
-                        value: root.pct
-                        tint: root.inkColor
-                        opacity: 0.45
-                    }
+                x: sheenBand.sweepX
+                width: body.width * 0.6
+                height: body.height
+                antialiasing: true
+
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0) }
+                    GradientStop { position: 0.5; color: Qt.rgba(1, 1, 1, 0.6) }
+                    GradientStop { position: 1.0; color: Qt.rgba(1, 1, 1, 0) }
                 }
 
-                Item {
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: sheenMover.coreWidth
-                    clip: true
-
-                    ChargeRow {
-                        y: (chargeShimmer.height - height) / 2
-                        x: (chargeShimmer.width - implicitWidth) / 2 - sheenMover.x
-                            - (sheenMover.width - sheenMover.coreWidth) / 2
-                        u: root.s
-                        value: root.pct
-                        tint: root.inkColor
-                    }
-                }
-
-                SequentialAnimation on x {
+                SequentialAnimation on sweepX {
                     loops: Animation.Infinite
-                    running: root.sheenActive
+                    running: root.sheenActive && root.charging
 
-                    PauseAnimation { duration: 250 }
+                    PauseAnimation { duration: 300 }
 
                     NumberAnimation {
-                        from: -sheenMover.width
-                        to: chargeShimmer.width
-                        duration: 2000
+                        from: -sheenBand.width
+                        to: sheenClip.width
+                        duration: 1500
                         easing.type: Easing.Linear
                     }
                 }
@@ -164,7 +151,7 @@ Item {
             anchors.centerIn: parent
             u: root.s
             tint: root.inkColor
-            visible: root.charging && !root.showPercent
+            visible: root.sheenActive && root.charging && !root.showPercent
             z: 2
         }
     }
@@ -181,8 +168,7 @@ Item {
         Behavior on color { ColorAnimation { duration: 300 } }
     }
 
-    //* One % + bolt row, instantiated 3x by the sheen so the highlight stays
-    //* registered over the text exactly like the lockscreen.
+    //* One % + bolt row for the charging state.
     component ChargeRow: Row {
         id: chargeRow
 
