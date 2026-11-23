@@ -33,6 +33,7 @@ SettingsPage {
         { item: autoHideRow, kind: "toggle", get: function () { return Flags.autoHide; }, set: function (v) { Flags.autoHide = v; } },
         { item: memoryRow, kind: "toggle", get: function () { return Flags.memorySaver; }, set: function (v) { Flags.memorySaver = v; } },
         { item: gapRow, kind: "seg", vals: [0, 1, 2, 3], get: function () { return root.gapIndex; }, set: function (v) { Flags.appGap = root.gaps[Math.round(v)]; } },
+        { item: wsOsdRow, kind: "seg", vals: ["auto", "always", "off"], get: function () { return Flags.workspaceOsd; }, set: function (v) { Flags.workspaceOsd = v; } },
         { item: clickRow, kind: "activate", activate: function () { root.requestPage("rightClickDetails"); } }
     ]
 
@@ -82,6 +83,28 @@ SettingsPage {
             format: root.gapPct
             last: true
             onMoved: (v) => Flags.appGap = root.gaps[Math.round(v)]
+        }
+    }
+
+    SettingsCard {
+        title: "On-screen display"
+
+        SettingsCardRow {
+            id: wsOsdRow
+            surface: root
+            label: "Workspace OSD"
+            sub: "Auto hides it while the Status pill face shows the workspace bars"
+            last: true
+
+            SettingsChoice {
+                options: [
+                    { label: "Auto", value: "auto" },
+                    { label: "Always", value: "always" },
+                    { label: "Off", value: "off" }
+                ]
+                value: Flags.workspaceOsd
+                onPicked: (v) => Flags.workspaceOsd = v
+            }
         }
     }
 

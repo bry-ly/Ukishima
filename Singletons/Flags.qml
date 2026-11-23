@@ -33,6 +33,8 @@ Singleton {
     //* The dock's own UI scale, independent of the pill's `uiScale`.
     property alias dockUiScale: adapter.dockUiScale
     property alias reduceMotion: adapter.reduceMotion
+    //* Workspace-switch OSD: "auto" hides the capsule while the Status pill face already shows the bars, "always" shows it on every switch, "off" never shows it.
+    property alias workspaceOsd: adapter.workspaceOsd
     property alias manualHue: adapter.manualHue
     property alias manualDark: adapter.manualDark
     property alias manualSat: adapter.manualSat
@@ -195,6 +197,8 @@ Singleton {
             property real uiScale: 1
             property real dockUiScale: 1
             property bool reduceMotion: false
+            //* Workspace-switch OSD: "auto" hides the capsule while the Status pill face already shows the bars, "always" shows it on every switch, "off" never shows it.
+            property string workspaceOsd: "auto"
             property int manualHue: 30
             property bool manualDark: true
             property real manualSat: 0.5

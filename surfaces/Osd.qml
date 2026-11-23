@@ -61,9 +61,16 @@ Item {
      * swallows the initial populate, so login doesn't flash. Skipped while the
      * pill is expanded: the hover/surface pill already shows the live dots with
      * the active one marked, so the OSD would only be a redundant morph.
+     *
+     * The Status resting face also draws the workspace bars, so "auto" (the
+     * default) suppresses the workspace capsule there too. The Interface page
+     * exposes Auto / Always / Off.
      */
+    readonly property bool statusFaceShowsWorkspaces: Flags.mainDisplay === "status"
+    readonly property bool workspaceOsdOn: Flags.workspaceOsd === "always"
+        || (Flags.workspaceOsd !== "off" && !root.expanded && !root.statusFaceShowsWorkspaces)
     readonly property string activeWsName: Wm.activeWorkspaceName(screenName)
-    onActiveWsNameChanged: if (activeWsName.length > 0 && !expanded) flash("workspace");
+    onActiveWsNameChanged: if (activeWsName.length > 0 && root.workspaceOsdOn) flash("workspace");
 
     /**
      * Media (track) flashes are intentionally disabled: a playing browser throws
