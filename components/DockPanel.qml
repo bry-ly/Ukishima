@@ -47,10 +47,15 @@ Item {
 
     /** The dock's palette, handed down by the host that owns it. */
     property var pal: null
+    /** Marker for hosts that hand a palette down (DockPanel pages only). */
+    readonly property bool acceptsPalette: true
 
     /** Draw the page's own header strip. The standalone settings window turns
      *  this off and supplies its own page header and sidebar. */
     property bool showHeader: true
+    /** Draw the dock's own backdrop. A host that already draws a sheet (the
+     *  settings window dialog) turns this off to avoid a card inside a card. */
+    property bool showBackdrop: true
 
     /** Name of the surface to navigate back to when the header back chevron is clicked. */
     property string backSurface: ""
@@ -238,6 +243,7 @@ Item {
     Rectangle {
         id: pane
         anchors.fill: parent
+        visible: root.showBackdrop
         radius: 16 * root.s
         clip: true
         gradient: Gradient {
@@ -296,7 +302,7 @@ Item {
         anchors.right: parent.right
         height: (root.padTop + 24) * root.s
         z: 10
-        enabled: root.open
+        enabled: root.open && root.showHeader
         cursorShape: Qt.PointingHandCursor
         onClicked: root.surfaceBack()
     }

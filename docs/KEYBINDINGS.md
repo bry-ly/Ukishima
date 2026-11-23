@@ -104,7 +104,7 @@ Calling a surface again toggles it closed. Most surface calls accept a monitor n
 - `hide` — close the open surface and the settings window
 - `page` — open a surface by name; legacy settings-surface names open the matching settings page
 - `settings` — open or close the settings window on the focused monitor
-- `settingsPage` — open the settings window at a page id
+- `settingsPage` — open the settings window at a page or editor sheet id
 - `unloadAll` — free closed surfaces
 - `minimizeWindow` / `restoreWindow` — minimize or restore a Hyprland window
 - `emoji` — emoji picker
@@ -112,8 +112,9 @@ Calling a surface again toggles it closed. Most surface calls accept a monitor n
 - `mixer` — audio mixer
 - `media` — media surface, when a player is running
 - `barIsland`, `appearance`, `motion`, `interface`, `lock`, `dock`, `systemSettings` — main settings pages for `settingsPage`
-- `themeDetails`, `accentEditor`, `fontColorEditor`, `fontPicker`, `rightClickDetails`, `lockDetails`, `dockThemeDetails`, `dockApps`, `updateDetails`, `profileDetails` — settings subpages
-- `appearance`, `appcat`, `display`, `modules`, `theme`, `accent`, `glass`, `fontcolor`, `rightclick`, `fontpicker`, `locksettings`, `update`, `profile`, `surfacestyles`, `dockSettings`, `dockBehavior`, `dockAppearance`, `dockApps`, `dockMotion` — legacy settings-surface names, mapped to the new pages
+- `themeDetails`, `accentEditor`, `fontColorEditor`, `fontPicker`, `rightClickDetails`, `lockDetails`, `dockThemeDetails`, `dockApps`, `updateDetails` — editor sheets, opened over their parent settings page
+- `profileDetails` — the Profile page (the only settings subpage)
+- `appearance`, `appcat`, `display`, `modules`, `theme`, `accent`, `glass`, `fontcolor`, `rightclick`, `fontpicker`, `locksettings`, `update`, `profile`, `surfacestyles`, `dockSettings`, `dockBehavior`, `dockAppearance`, `dockApps`, `dockMotion` — legacy settings-surface names, mapped to the new pages and editor sheets
 - `wifi`, `bt`, `weather`, `timer` — regular surfaces
 
 Locking is started with `scripts/lock.sh`; it is not an IPC surface. `awww-daemon` can be started at login or left for the shell to start on demand.

@@ -3,8 +3,8 @@ import "../../Singletons"
 
 /**
  * Appearance: theme, accent, material, typography and the per-surface styles.
- * Complex editors (hue, accent, colour, font family) open as subpages and reuse
- * the existing implementations, so every flag keeps one source of truth.
+ * Complex editors (hue, accent, colour, font family) open as modal sheets and
+ * reuse the existing implementations, so every flag keeps one source of truth.
  */
 SettingsPage {
     id: root

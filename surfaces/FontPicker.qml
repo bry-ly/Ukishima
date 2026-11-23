@@ -92,6 +92,11 @@ SettingsSurface {
         root.pick(root.families[root.focusIndex].family);
     }
 
+    /** Give the search field the caret when this surface opens in a sheet. */
+    function focusInitial() {
+        Qt.callLater(searchField.forceActiveFocus);
+    }
+
     onActiveChanged: {
         if (active) {
             focusIndex = 0;

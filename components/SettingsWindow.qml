@@ -14,10 +14,12 @@ import "settings"
  * list and search-first behaviour. The shell accent replaces the reference's
  * fixed teal so light/dark/dynamic palettes stay cohesive.
  *
- * Complex editors stay as proven subpages (theme hue, accent, font colour,
- * font list, lock, dock theme/apps, updater, profile); the category pages are
- * new grouped card surfaces and all binding logic remains on the shared Flags
- * and singletons.
+ * Complex editors open as modal sheets over the current category rather than
+ * replacing the content column: the page the user was reading stays visible,
+ * the sheet carries its own heading, and dismiss returns to the same spot. This
+ * follows the reference windows' sheets and keeps the flat list of seven
+ * sidebar categories intact. Only Profile keeps a page of its own because it is
+ * an About-style read-only view rather than an editor.
  */
 Item {
     id: root
@@ -45,9 +47,9 @@ Item {
 
     // ── Page catalogue ────────────────────────────────────────────────────
     //
-    // Only the seven top-level entries are in the sidebar. Subpages carry a
-    // parent and stay out of the list; the toolbar's back/forward history and
-    // the sidebar highlight make their position legible.
+    // Only the seven top-level entries are in the sidebar. Profile is the one
+    // subpage with a page of its own; every editor is a sheet defined below and
+    // leaves the page underneath intact.
 
     readonly property var pageDefs: [
         { id: "barIsland", label: "Bar & Island", icon: "monitor",
@@ -65,27 +67,73 @@ Item {
         { id: "systemSettings", label: "System", icon: "cog",
           keywords: "update profile dependencies system info kernel cpu gpu" },
 
-        { id: "themeDetails", label: "Theme", icon: "palette", parent: "appearance", sidebar: false,
-          keywords: "theme wallpaper hue manual dynamic light dark" },
-        { id: "accentEditor", label: "Accent colour", icon: "sparkles", parent: "appearance", sidebar: false,
-          keywords: "accent colour color hue saturation hex" },
-        { id: "fontColorEditor", label: "Font colour", icon: "type", parent: "appearance", sidebar: false,
-          keywords: "font text colour color hue saturation hex" },
-        { id: "fontPicker", label: "Font family", icon: "language", parent: "appearance", sidebar: false,
-          keywords: "font family typeface" },
-        { id: "rightClickDetails", label: "Right-click", icon: "cursor", parent: "interface", sidebar: false,
-          keywords: "right click cycle stop slots" },
-        { id: "lockDetails", label: "Lock screen", icon: "lock", parent: "lock", sidebar: false,
-          keywords: "lock method backdrop blur avatar" },
-        { id: "dockThemeDetails", label: "Dock theme", icon: "palette", parent: "dock", sidebar: false,
-          keywords: "dock theme oled glass hue manual" },
-        { id: "dockApps", label: "Dock apps", icon: "grid", parent: "dock", sidebar: false,
-          keywords: "dock apps pin pinned applications" },
-        { id: "updateDetails", label: "Updates", icon: "refresh", parent: "systemSettings", sidebar: false,
-          keywords: "update git dependencies" },
         { id: "profileDetails", label: "Profile", icon: "user", parent: "systemSettings", sidebar: false,
           keywords: "profile system info host kernel gpu cpu memory disk" }
     ]
+
+    // ── Sheet catalogue ───────────────────────────────────────────────────
+    //
+    // The editors keep their proven implementations. Each entry names the page
+    // it belongs to so an IPC call or keybind can open the right category with
+    // the sheet already over it.
+
+    readonly property var dialogMeta: ({
+        themeDetails: {
+            title: "Theme & wallpaper",
+            subtitle: "Palette mode, wallpaper folder and the manual hue",
+            parent: "appearance"
+        },
+        accentEditor: {
+            title: "Accent colour",
+            subtitle: "Pin one accent for the whole shell",
+            parent: "appearance"
+        },
+        fontColorEditor: {
+            title: "Font colour",
+            subtitle: "Recolour the primary text family",
+            parent: "appearance"
+        },
+        fontPicker: {
+            title: "UI font",
+            subtitle: "Pick the family used by the shell",
+            parent: "appearance",
+            nested: true
+        },
+        rightClickDetails: {
+            title: "Right-click stops",
+            subtitle: "Choose the 4th and 5th surface in the walk",
+            parent: "interface"
+        },
+        lockDetails: {
+            title: "Lock screen",
+            subtitle: "Method, backdrop and indicator setup",
+            parent: "lock"
+        },
+        dockThemeDetails: {
+            title: "Dock theme",
+            subtitle: "Palette, glass and the manual dock hue",
+            parent: "dock",
+            assignPal: true,
+            chromeless: true
+        },
+        dockApps: {
+            title: "Dock apps",
+            subtitle: "Search, pin and reorder applications",
+            parent: "dock",
+            nested: true,
+            assignPal: true,
+            chromeless: true
+        },
+        updateDetails: {
+            title: "Updates",
+            subtitle: "Check the release and verify dependencies",
+            parent: "systemSettings"
+        }
+    })
+
+    function dialogDefFor(id) {
+        return root.dialogMeta[id] !== undefined ? root.dialogMeta[id] : null;
+    }
 
     function defFor(id) {
         for (var i = 0; i < root.pageDefs.length; i++)
@@ -128,7 +176,11 @@ Item {
     }
 
     function validPage(id) {
-        return root.defFor(id) !== null;
+        return root.defFor(id) !== null || root.isDialogPage(id);
+    }
+
+    function isDialogPage(id) {
+        return root.dialogDefFor(id) !== null;
     }
 
     function normalizePage(id) {
@@ -148,8 +200,7 @@ Item {
         return root.validPage(out) ? out : "barIsland";
     }
 
-    readonly property bool pageHasNestedScroll: SettingsState.page === "fontPicker"
-        || SettingsState.page === "dockApps"
+    readonly property bool dialogOpen: SettingsState.dialog.length > 0
 
     // ── Geometry ──────────────────────────────────────────────────────────
 
@@ -164,7 +215,6 @@ Item {
     readonly property real pagePad: 32 * root.s
     readonly property real pageMaxW: 780 * root.s
     readonly property real pageScale: root.s
-    readonly property real legacyScale: root.s * 1.12
     readonly property real pageTopPad: 16 * root.s
     readonly property real pageBottomPad: 30 * root.s
     readonly property real pageW: Math.max(0, Math.min(root.pageMaxW,
@@ -243,104 +293,48 @@ Item {
     }
 
     Component {
-        id: compThemeDetails
-        LegacyPage {
-            s: root.legacyScale
-            title: "Palette"
-            page: Component { ThemeSurface {} }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compThemeSheet
+        ThemeSurface {}
     }
 
     Component {
-        id: compAccentEditor
-        LegacyPage {
-            s: root.legacyScale
-            title: "Accent"
-            page: Component { AccentSurface {} }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compAccentSheet
+        AccentSurface {}
     }
 
     Component {
-        id: compFontColorEditor
-        LegacyPage {
-            s: root.legacyScale
-            title: "Typography"
-            page: Component { FontColorSurface {} }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compFontColorSheet
+        FontColorSurface {}
     }
 
     Component {
-        id: compFontPicker
-        LegacyPage {
-            s: root.legacyScale
-            title: "Font family"
-            page: Component { FontPicker { listMaxHeight: 420 } }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compFontPickerSheet
+        FontPicker { listMaxHeight: 360 }
     }
 
     Component {
-        id: compRightClickDetails
-        LegacyPage {
-            s: root.legacyScale
-            title: "Walk stops"
-            page: Component { RightClickSurface {} }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compRightClickSheet
+        RightClickSurface {}
     }
 
     Component {
-        id: compLockDetails
-        LegacyPage {
-            s: root.legacyScale
-            title: "Lock screen"
-            page: Component { LockSettings {} }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compLockSheet
+        LockSettings {}
     }
 
     Component {
-        id: compDockThemeDetails
-        LegacyPage {
-            s: root.legacyScale
-            title: "Dock palette"
-            assignPal: true
-            page: Component { DockAppearance {} }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compDockThemeSheet
+        DockAppearance {}
     }
 
     Component {
-        id: compDockApps
-        LegacyPage {
-            s: root.legacyScale
-            framed: false
-            assignPal: true
-            page: Component { DockApps { listMaxHeight: 420 } }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compDockAppsSheet
+        DockApps { listMaxHeight: 320 }
     }
 
     Component {
-        id: compUpdateDetails
-        LegacyPage {
-            s: root.legacyScale
-            title: "Updates"
-            page: Component { UpdateSurface {} }
-            onRequestPage: (page) => root.openSurfacePage(page)
-            onRequestBack: root.goBack()
-        }
+        id: compUpdateSheet
+        UpdateSurface {}
     }
 
     Component {
@@ -361,23 +355,49 @@ Item {
         lock: compLock,
         dock: compDock,
         systemSettings: compSystem,
-        themeDetails: compThemeDetails,
-        accentEditor: compAccentEditor,
-        fontColorEditor: compFontColorEditor,
-        fontPicker: compFontPicker,
-        rightClickDetails: compRightClickDetails,
-        lockDetails: compLockDetails,
-        dockThemeDetails: compDockThemeDetails,
-        dockApps: compDockApps,
-        updateDetails: compUpdateDetails,
         profileDetails: compProfileDetails
+    })
+
+    readonly property var dialogComponents: ({
+        themeDetails: compThemeSheet,
+        accentEditor: compAccentSheet,
+        fontColorEditor: compFontColorSheet,
+        fontPicker: compFontPickerSheet,
+        rightClickDetails: compRightClickSheet,
+        lockDetails: compLockSheet,
+        dockThemeDetails: compDockThemeSheet,
+        dockApps: compDockAppsSheet,
+        updateDetails: compUpdateSheet
     })
 
     // ── Navigation / history ──────────────────────────────────────────────
 
     function takeFocus() {
-        if (root.alive && root.open)
+        if (!root.alive || !root.open)
+            return;
+        if (root.dialogOpen)
+            settingsDialog.takeFocus();
+        else
             pageFocus.forceActiveFocus();
+    }
+
+    function openDialog(id) {
+        if (!root.dialogDefFor(id))
+            return;
+        if (Selector.open)
+            Selector.close();
+        // A sheet is modal over the window, not a page switch: opening Lock
+        // settings from Profile's "Edit avatar" must leave Profile behind the
+        // sheet so dismissing it returns there. IPC and keybind ids still land
+        // on the category page because the window resolves those in
+        // initHistory/onPageChanged before raising the sheet.
+        SettingsState.openDialog(id);
+        Qt.callLater(root.takeFocus);
+    }
+
+    function dismissDialog() {
+        SettingsState.closeDialog();
+        Qt.callLater(root.takeFocus);
     }
 
     function resetQuery() {
@@ -395,19 +415,31 @@ Item {
     }
 
     function initHistory() {
-        var page = root.normalizePage(SettingsState.page);
-        if (page !== SettingsState.page)
-            SettingsState.page = page;
+        var target = root.normalizePage(SettingsState.page);
+        var def = root.dialogDefFor(target);
+        var dialog = def ? target : "";
+        if (def)
+            target = def.parent || root.activeCategory;
+        if (target !== SettingsState.page)
+            SettingsState.page = target;
+        if (dialog.length > 0)
+            SettingsState.openDialog(dialog);
+        else if (SettingsState.dialog.length > 0 && !root.dialogDefFor(SettingsState.dialog))
+            SettingsState.closeDialog();
         if (root.history.length === 0 || !root.validPage(root.history[root.historyIndex])) {
-            root.history = [page];
+            root.history = [target];
             root.historyIndex = 0;
-        } else if (root.history[root.historyIndex] !== page) {
-            root.pushHistory(page);
+        } else if (root.history[root.historyIndex] !== target) {
+            root.pushHistory(target);
         }
     }
 
     function goPage(page) {
         var next = root.normalizePage(page);
+        if (root.dialogDefFor(next)) {
+            root.openDialog(next);
+            return;
+        }
         if (next === SettingsState.page)
             return;
         SettingsState.navigate(next);
@@ -442,14 +474,22 @@ Item {
             dockAppearance: "dockThemeDetails", dockApps: "dockApps", dockMotion: "dock"
         };
         var page = map[name] !== undefined ? map[name] : name;
-        if (root.validPage(page))
+        if (root.isDialogPage(page)) {
+            root.openDialog(page);
+            return;
+        }
+        if (root.validPage(page)) {
+            root.dismissDialog();
             root.goPage(page);
-        else
-            root.goBack();
+            return;
+        }
+        root.dismissDialog();
+        root.goBack();
     }
 
     function pickCategory(id) {
         root.resetQuery();
+        root.dismissDialog();
         root.goPage(id);
         pageFocus.forceActiveFocus();
     }
@@ -527,6 +567,7 @@ Item {
         } else if (root.alive) {
             if (Selector.open)
                 Selector.close();
+            SettingsState.closeDialog();
             closeTimer.restart();
         }
     }
@@ -535,7 +576,16 @@ Item {
         target: SettingsState
 
         function onPageChanged() {
-            var page = root.normalizePage(SettingsState.page);
+            var requested = root.normalizePage(SettingsState.page);
+            var def = root.dialogDefFor(requested);
+            if (def) {
+                // IPC and legacy surface names still point at an editor id:
+                // put the window on its category, then raise the sheet over it.
+                SettingsState.page = def.parent || root.activeCategory;
+                SettingsState.openDialog(requested);
+                return;
+            }
+            var page = requested;
             if (page !== SettingsState.page) {
                 SettingsState.page = page;
                 return;
@@ -937,10 +987,13 @@ Item {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            focus: root.open
+            focus: root.open && !root.dialogOpen
+            enabled: !root.dialogOpen
 
             Keys.onEscapePressed: (e) => {
-                if (Selector.open) {
+                if (root.dialogOpen) {
+                    root.dismissDialog();
+                } else if (Selector.open) {
                     Selector.close();
                 } else if (root.currentDef.parent) {
                     root.goBack();
@@ -1075,7 +1128,6 @@ Item {
                     anchors.fill: parent
                     s: root.s
                     flick: pageScroll
-                    enabled: !root.pageHasNestedScroll
                 }
 
                 ScrollRail {
@@ -1090,6 +1142,19 @@ Item {
                     ink: Theme.cream
                 }
             }
+        }
+
+        SettingsDialog {
+            id: settingsDialog
+
+            s: root.s
+            cornerRadius: card.radius
+            open: root.open && root.dialogOpen
+            dialogId: SettingsState.dialog
+            meta: root.dialogMeta
+            components: root.dialogComponents
+            onClosed: root.dismissDialog()
+            onRequestPage: (page) => root.openSurfacePage(page)
         }
     }
 

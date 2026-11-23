@@ -3,10 +3,9 @@ import "../../Singletons"
 import ".."
 
 /**
- * A right-aligned action/value control. Used for rows that open a subpage or a
- * command ("Choose…", "Manage apps", "Open update") rather than selecting a
- * value in place. The `boxed` variant reads like the reference's rounded font
- * fields.
+ * A right-aligned action/value control. Used for rows that open a modal sheet or
+ * a page ("Choose…", "Manage apps", "Open update") rather than selecting a value
+ * in place. The `boxed` variant reads like the reference's rounded font fields.
  */
 Item {
     id: root

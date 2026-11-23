@@ -101,6 +101,10 @@ DockPanel {
             root.togglePin(e.id);
     }
 
+    /** Give the search field the caret when this surface opens in a sheet. */
+    function focusInitial() {
+        Qt.callLater(appSearch.forceActiveFocus);
+    }
 
     /** Window position of the last hover event allowed to move the highlight.
      * Rows sliding under a stationary cursor during keyboard scrolling repeat

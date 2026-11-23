@@ -16,9 +16,10 @@ import Quickshell
  * remembers which screen the window was opened on so a multi-monitor setup
  * reopens where the user was working.
  *
- * The page ids are owned by the window (`components/SettingsWindow.qml`); this
- * singleton only carries the state and never validates names, so a page can be
- * added or renamed in one place without touching this file.
+ * The page ids and editor sheet ids are owned by the window
+ * (`components/SettingsWindow.qml`); this singleton only carries the state and
+ * never validates names, so a page or sheet can be added or renamed in one place
+ * without touching this file.
  */
 Singleton {
     id: root
@@ -26,9 +27,16 @@ Singleton {
     property bool open: false
     property string monitor: ""
     property string page: "barIsland"
+    /**
+     * Advanced editors are modal sheets over the current category page rather
+     * than pages of their own, so the page the user was reading stays behind
+     * them. Empty means no sheet is up.
+     */
+    property string dialog: ""
 
     /** Open on `mon`, optionally switching to `page` first. */
     function show(mon, page) {
+        root.closeDialog();
         if (mon && String(mon).length > 0)
             root.monitor = String(mon);
         if (page !== undefined && page !== null && String(page).length > 0)
@@ -37,7 +45,16 @@ Singleton {
     }
 
     function hide() {
+        root.closeDialog();
         root.open = false;
+    }
+
+    function openDialog(id) {
+        root.dialog = (id === undefined || id === null) ? "" : String(id);
+    }
+
+    function closeDialog() {
+        root.dialog = "";
     }
 
     /** The cog's behaviour: toggle when already up on this monitor. */

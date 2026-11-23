@@ -1,7 +1,7 @@
 import QtQuick
 import "../../Singletons"
 
-/** Lock screen: the full editor lives on a subpage; indicators are direct. */
+/** Lock screen: the full editor opens as a modal sheet; indicators are direct. */
 SettingsPage {
     id: root
 
