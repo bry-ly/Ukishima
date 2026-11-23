@@ -580,7 +580,7 @@ PillSurface {
                             Item {
                                 id: modelRow
                                 required property var modelData
-                                width: parent.width
+                                width: providerCol.width
                                 height: 18 * root.s
 
                                 Text {
