@@ -10,6 +10,9 @@ import "../components"
  * database and plan endpoint. Modelled on Omarchy's agents panel: a hero per
  * provider, a meter and reset countdown per limit window, then today, the last
  * seven days and the models those tokens went to.
+ *
+ * The OpenCode mark is the official transparent logo from opencode.ai/brand,
+ * used unmodified on a neutral tile per its guidelines.
  */
 PillSurface {
     id: root
@@ -268,7 +271,7 @@ PillSurface {
 
                     Item {
                         width: parent.width
-                        height: 34 * root.s
+                        height: 38 * root.s
 
                         Row {
                             anchors.left: parent.left
@@ -277,15 +280,29 @@ PillSurface {
 
                             Rectangle {
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: 28 * root.s
+                                width: 36 * root.s
                                 height: width
-                                radius: 9 * root.s
-                                color: Qt.alpha(Theme.vermLit, 0.14)
+                                radius: 10 * root.s
+                                color: Theme.frameBg
                                 border.width: 1
-                                border.color: Qt.alpha(Theme.vermLit, 0.22)
+                                border.color: Theme.hairSoft
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    visible: String(providerCol.modelData.id || "") === "opencode"
+                                    width: 16 * root.s
+                                    height: 20 * root.s
+                                    source: Theme.light
+                                        ? Qt.resolvedUrl("../assets/opencode-logo-transparent-light.svg")
+                                        : Qt.resolvedUrl("../assets/opencode-logo-transparent-dark.svg")
+                                    sourceSize: Qt.size(32 * root.s, 40 * root.s)
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                }
 
                                 Text {
                                     anchors.centerIn: parent
+                                    visible: String(providerCol.modelData.id || "") !== "opencode"
                                     text: root.providerMark(providerCol.modelData)
                                     color: Theme.vermLit
                                     font.family: Theme.font
