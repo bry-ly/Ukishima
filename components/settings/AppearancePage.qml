@@ -41,7 +41,11 @@ SettingsPage {
             { item: contrastRow, kind: "seg", vals: [0, 0.5, 1], get: function () { return Flags.glassText; }, set: function (v) { Flags.glassText = v; } },
             { item: fontColourRow, kind: "activate", activate: function () { root.requestPage("fontColorEditor"); } },
             { item: fontRow, kind: "activate", activate: function () { root.requestPage("fontPicker"); } },
-            { item: pillStyleRow, kind: "seg", vals: ["minimal", "classic", "system", "status", "strip"], get: function () { return Flags.mainDisplay; }, set: function (v) { Flags.mainDisplay = v; } },
+            { item: pillStyleRow, kind: "seg", vals: ["minimal", "classic", "system", "status", "strip"], get: function () { return Flags.mainDisplay; }, set: function (v) { Flags.mainDisplay = v; } }
+        );
+        if (Flags.mainDisplay === "status")
+            base.push({ item: batteryPctRow, kind: "toggle", get: function () { return Flags.batteryPercent; }, set: function (v) { Flags.batteryPercent = v; } });
+        base.push(
             { item: mediaStyleRow, kind: "seg", vals: ["default", "rail", "sleeve", "ledger", "matrix", "title"], get: function () { return Flags.styleMedia; }, set: function (v) { Flags.styleMedia = v; } },
             { item: mixerStyleRow, kind: "seg", vals: ["default", "comb", "slats", "stipple", "weave"], get: function () { return Flags.styleMixer; }, set: function (v) { Flags.styleMixer = v; } },
             { item: sysmonStyleRow, kind: "seg", vals: ["default", "rail", "ledger", "matrix", "title"], get: function () { return Flags.styleSysmon; }, set: function (v) { Flags.styleSysmon = v; } },
@@ -194,6 +198,19 @@ SettingsPage {
                 ]
                 value: Flags.mainDisplay
                 onPicked: (v) => Flags.mainDisplay = v
+            }
+        }
+
+        SettingsCardRow {
+            id: batteryPctRow
+            surface: root
+            label: "Battery percentage"
+            sub: "Show the charge number inside the Status battery"
+            visible: Flags.mainDisplay === "status"
+
+            SettingsSwitch {
+                on: Flags.batteryPercent
+                onToggled: Flags.batteryPercent = !Flags.batteryPercent
             }
         }
 

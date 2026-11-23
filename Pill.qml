@@ -2432,6 +2432,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         s: pill.s * 0.88
                         shimmerOn: !Flags.reduceMotion
+                        showPercent: Flags.batteryPercent
                     }
                 }
             }

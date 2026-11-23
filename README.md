@@ -20,7 +20,7 @@ Explore the animated showcase, features and settings on the [Ukishima website](h
 - **Dock** — pinned and running apps, hover magnification, window previews, auto-hide, and its own theme.
 - **Settings** — a centred floating window opened from the pill's cog (or `qs ipc call ukishima settings ""`). Seven grouped categories — Bar & Island, Appearance, Motion, Interface, Lock Screen, Dock and System — sit in a search-first sidebar; grouped cards and ticked sliders handle the page content, while advanced editors (theme, accent, fonts, lock, dock theme/apps, updates) open as modal sheets over the page instead of replacing it. Every change applies live on the pill above.
 - **Surfaces** — launcher, emoji, weather, calendar, media player, mixer, wallpaper browser and Wallhaven search, screen recorder, clipboard, Wi-Fi, Bluetooth, battery, power menu, system monitor and scratchpad.
-- **Surface styles** — the pill, media player, mixer, system monitor, scratchpad and lock screen each offer several layouts, under **Settings → Appearance → Surface Styles**.
+- **Surface styles** — the pill, media player, mixer, system monitor, scratchpad and lock screen each offer several layouts, under **Settings → Appearance → Surface Styles**. The Status pill face also has a **Battery percentage** switch for the number inside its battery.
 - **Wallpapers** — shuffled image wallpapers through `awww`, video wallpapers through `mpvpaper`, a cover/contain/stretch/center fit, and a palette taken from the current wallpaper.
 - **Compositor-aware** — workspaces, window state, keyboard layout, lock backends and dependency checks follow Hyprland or niri. Hyprland-only features are hidden on niri.
 - **Extras** — night light (Hyprland), game mode, keep-awake and an in-app updater.

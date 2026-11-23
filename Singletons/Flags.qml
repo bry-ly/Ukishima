@@ -18,6 +18,8 @@ Singleton {
     property alias time12h: adapter.time12h
     property alias clockSeconds: adapter.clockSeconds
     property alias mainDisplay: adapter.mainDisplay
+    //* Status face: draw the charge number inside the battery. Off leaves the fill and charging bolt.
+    property alias batteryPercent: adapter.batteryPercent
     property alias expandTo: adapter.expandTo
     property alias showGlyphs: adapter.showGlyphs
     //* Resting pill's clock icon, left of the time. Only drawn when showGlyphs is off — the two are alternatives in the same slot, \u6642 or a clock face.
@@ -172,6 +174,8 @@ Singleton {
             property bool clockSeconds: false
             //* Collapsed-pill face: "minimal" (glyph + time), "classic" (date + time), "system" (weekday, time, workspace, layout, battery), "status" (workspace bars, time, wifi bars, battery icon) or "strip" (full-width top bar).
             property string mainDisplay: "minimal"
+            //* Status face: draw the charge number inside the battery. Off leaves the fill and charging bolt.
+            property bool batteryPercent: true
             //* What the media card's Expand control opens: "media" keeps the surface as the main screen, "pill" swaps to the expanded pill. With auto-hide off, "media" also makes hovering the resting pill grow into the player.
             property string expandTo: "pill"
             property bool showGlyphs: true

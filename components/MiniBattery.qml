@@ -18,6 +18,8 @@ Item {
     property real s: 1
     /** Sweep the charging row; hosts pass !Flags.reduceMotion. */
     property bool shimmerOn: true
+    /** Draw the charge number inside the shell; off leaves the fill and bolt. */
+    property bool showPercent: true
 
     readonly property int pct: Battery.pct
     readonly property bool full: Battery.full || root.pct >= 100
@@ -28,9 +30,10 @@ Item {
     readonly property color fillColor: root.low ? "#ff3b30" : "#34c759"
     readonly property color bodyColor: Qt.alpha(Theme.cream, 0.35)
     readonly property color inkColor: Theme.cream
+    readonly property real bodyW: (root.showPercent ? 34 : 22) * root.s
 
     visible: Battery.present
-    implicitWidth: 37 * root.s
+    implicitWidth: root.bodyW + 3 * root.s
     implicitHeight: 17 * root.s
     Accessible.role: Accessible.StaticText
     Accessible.name: "Battery " + root.pct + " percent" + (root.charging ? ", charging" : (root.full ? ", fully charged" : ""))
@@ -40,11 +43,15 @@ Item {
 
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        width: 34 * root.s
+        width: root.bodyW
         height: 17 * root.s
         radius: 6 * root.s
         color: root.bodyColor
         clip: true
+
+        Behavior on width {
+            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+        }
 
         Rectangle {
             anchors.left: parent.left
@@ -54,7 +61,7 @@ Item {
             bottomLeftRadius: 6 * root.s
             topRightRadius: root.roundedEnd ? 6 * root.s : 0
             bottomRightRadius: root.roundedEnd ? 6 * root.s : 0
-            width: Math.max(12 * root.s, parent.width * root.pct / 100)
+            width: Math.max((root.showPercent ? 12 : 7) * root.s, parent.width * root.pct / 100)
             color: root.fillColor
 
             Behavior on width {
@@ -71,7 +78,7 @@ Item {
             anchors.centerIn: parent
             width: chargeBase.implicitWidth
             height: chargeBase.implicitHeight
-            visible: root.charging
+            visible: root.charging && root.showPercent
             z: 2
 
             ChargeRow {
@@ -81,7 +88,7 @@ Item {
                 u: root.s
                 value: root.pct
                 tint: root.inkColor
-                opacity: root.sheenActive ? 0.55 : 1
+                opacity: root.sheenActive ? 0.95 : 1
             }
 
             Item {
@@ -144,13 +151,21 @@ Item {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.verticalCenter: parent.verticalCenter
             anchors.verticalCenterOffset: 0.8 * root.s
-            visible: !root.charging
+            visible: !root.charging && root.showPercent
             z: 2
             text: root.pct + ""
             color: root.inkColor
             font.family: Theme.font
             font.pixelSize: 13 * root.s
             font.weight: root.low ? Font.Bold : Font.DemiBold
+        }
+
+        MiniBatteryBolt {
+            anchors.centerIn: parent
+            u: root.s
+            tint: root.inkColor
+            visible: root.charging && !root.showPercent
+            z: 2
         }
     }
 
@@ -187,24 +202,10 @@ Item {
             font.weight: Font.DemiBold
         }
 
-        Shape {
+        MiniBatteryBolt {
             anchors.verticalCenter: parent.verticalCenter
-            width: 10 * chargeRow.u
-            height: 10 * chargeRow.u
-            antialiasing: true
-            preferredRendererType: Shape.CurveRenderer
-
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: chargeRow.tint
-                strokeWidth: 1.4
-                joinStyle: ShapePath.RoundJoin
-                capStyle: ShapePath.RoundCap
-
-                PathSvg {
-                    path: "M6.5 1 L2.5 5.8 h2.5 L4.6 9.2 L8 4.6 H5.5 Z"
-                }
-            }
+            u: chargeRow.u
+            tint: chargeRow.tint
         }
     }
 }
