@@ -355,6 +355,7 @@ ShellRoot {
         function peek(mon: string): void { root.peek(mon); }
         function hide(): void {
             SettingsState.hide();
+            WifiShare.hide();
             root.close();
         }
 
@@ -374,6 +375,16 @@ ShellRoot {
             const raw = (page === "system") ? "systemSettings" : page;
             const target = root.settingsPageFor(raw);
             SettingsState.togglePage(m, target.length > 0 ? target : raw);
+        }
+
+        /**
+         * Wi-Fi share card. Empty interface lets scripts/wifi-qr.sh pick the
+         * default-route Wi-Fi device, so this works without opening the Wi-Fi
+         * surface first.
+         */
+        function wifiQr(mon: string): void {
+            const m = (mon && mon.length > 0) ? mon : Wm.focusedScreenName();
+            WifiShare.toggle(m, "");
         }
 
         /**
@@ -520,7 +531,9 @@ ShellRoot {
             readonly property bool surfaceOpen: surface.length > 0
             /** The standalone settings window is up on this monitor. */
             readonly property bool settingsHere: SettingsState.open && SettingsState.monitor === modelData.name
-            readonly property bool modal: surfaceOpen || settingsHere || pill.held || pill.quickChoosing || pill.expandLatch || pickerHere
+            /** The Wi-Fi share card is up on this monitor. */
+            readonly property bool qrHere: WifiShare.open && WifiShare.monitor === modelData.name
+            readonly property bool modal: surfaceOpen || settingsHere || qrHere || pill.held || pill.quickChoosing || pill.expandLatch || pickerHere
 
             /**
              * True on the one window whose dropdown spawned the centred picker.
@@ -549,12 +562,12 @@ ShellRoot {
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: ((surfaceOpen || settingsHere || pill.quickChoosing || pickerHere)) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: ((surfaceOpen || settingsHere || qrHere || pill.quickChoosing || pickerHere)) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
             WlrLayershell.namespace: "ukishima"
 
             anchors { top: true; left: true; right: true; bottom: true }
 
-            mask: settingsHere ? fullRegion : (monFullscreen ? hiddenRegion : (modal && !FileTray.dragging ? fullRegion : (pill.mode === "game" ? pillRegion : (Flags.autoHide ? (pill.revealSession || pill.transientLive ? revealPillRegion : (pill.expanded ? pillRegion : revealRegion)) : pillRegion))))
+            mask: (settingsHere || qrHere) ? fullRegion : (monFullscreen ? hiddenRegion : (modal && !FileTray.dragging ? fullRegion : (pill.mode === "game" ? pillRegion : (Flags.autoHide ? (pill.revealSession || pill.transientLive ? revealPillRegion : (pill.expanded ? pillRegion : revealRegion)) : pillRegion))))
             Region { id: hiddenRegion }
 
             /**
@@ -913,6 +926,23 @@ ShellRoot {
                     s: overlay.s
                     screenName: overlay.modelData.name
                     hostActive: SettingsState.monitor === overlay.modelData.name
+                }
+
+                WifiQrOverlay {
+                    anchors.fill: parent
+                    z: 6500
+                    s: overlay.s
+                    screenName: overlay.modelData.name
+                    iface: WifiShare.iface
+                    active: WifiShare.open && WifiShare.monitor === overlay.modelData.name
+                }
+            }
+
+            Connections {
+                target: WifiShare
+                function onOpenChanged() {
+                    if (!WifiShare.open && WifiShare.monitor === overlay.modelData.name)
+                        focusScope.forceActiveFocus();
                 }
             }
 

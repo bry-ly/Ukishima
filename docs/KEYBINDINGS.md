@@ -105,6 +105,7 @@ Calling a surface again toggles it closed. Most surface calls accept a monitor n
 - `page` — open a surface by name; legacy settings-surface names open the matching settings page
 - `settings` — open or close the settings window on the focused monitor
 - `settingsPage` — open the settings window at a page or editor sheet id
+- `wifiQr` — open or close the Wi-Fi share QR card for the focused monitor's active Wi-Fi connection
 - `unloadAll` — free closed surfaces
 - `minimizeWindow` / `restoreWindow` — minimize or restore a Hyprland window
 - `emoji` — emoji picker
