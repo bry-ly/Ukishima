@@ -2425,52 +2425,13 @@ Item {
                         }
                     }
 
-                    Item {
+                    MiniBattery {
                         id: statusBatt
+
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        visible: Battery.present
-                        width: 23 * pill.s
-                        height: 12 * pill.s
-
-                        Rectangle {
-                            id: statusBattShell
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 20 * pill.s
-                            height: 11 * pill.s
-                            radius: 3 * pill.s
-                            color: "transparent"
-                            border.width: 1.3 * pill.s
-                            border.color: Battery.low ? Theme.vermLit : Qt.alpha(Theme.cream, 0.6)
-                        }
-                        Rectangle {
-                            anchors.left: statusBattShell.left
-                            anchors.leftMargin: 1.8 * pill.s
-                            anchors.verticalCenter: statusBattShell.verticalCenter
-                            width: Math.max(0, (statusBattShell.width - 3.6 * pill.s) * Battery.frac)
-                            height: statusBattShell.height - 3.6 * pill.s
-                            radius: 1.4 * pill.s
-                            color: (Battery.charging || Battery.low) ? Theme.vermLit : Theme.cream
-                        }
-                        GlyphIcon {
-                            anchors.centerIn: statusBattShell
-                            visible: Battery.charging
-                            width: 8 * pill.s
-                            height: 8 * pill.s
-                            name: "bolt"
-                            color: Theme.cream
-                            stroke: 1.6
-                        }
-                        Rectangle {
-                            anchors.left: statusBattShell.right
-                            anchors.leftMargin: 1 * pill.s
-                            anchors.verticalCenter: statusBattShell.verticalCenter
-                            width: 2 * pill.s
-                            height: 4.5 * pill.s
-                            radius: width / 2
-                            color: statusBattShell.border.color
-                        }
+                        s: pill.s
+                        shimmerOn: !Flags.reduceMotion
                     }
                 }
             }
