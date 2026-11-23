@@ -2825,12 +2825,15 @@ Item {
                     id: aiIcon
                     anchors.verticalCenter: parent.verticalCenter
                     visible: Flags.pillShowAi && AiUsage.hasProviders
-                    width: 17 * pill.s
+                    width: 30 * pill.s
                     height: 17 * pill.s
 
                     GlyphIcon {
-                        anchors.fill: parent
-                        name: "sparkles"
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 17 * pill.s
+                        height: width
+                        name: "robot"
                         color: aiArea.containsMouse ? Theme.cream : Theme.iconDim
                         stroke: 1.7
                     }
@@ -2840,7 +2843,6 @@ Item {
                         anchors.top: parent.top
                         anchors.right: parent.right
                         anchors.topMargin: -2 * pill.s
-                        anchors.rightMargin: -4 * pill.s
                         width: Math.max(12 * pill.s, aiBadge.implicitWidth + 4 * pill.s)
                         height: 10 * pill.s
                         radius: 3 * pill.s
