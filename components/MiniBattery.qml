@@ -9,8 +9,8 @@ import "../Singletons"
  * and colours. This shared component keeps the same artwork for the pill's
  * Status face: a rounded 35%-ink shell, a green fill (red at or below 20%)
  * with the percentage inside, a bolt + percentage row while charging, and a
- * sliding glint across the body. The lockscreen copy remains the source of the
- * geometry; keep the two in sync by hand.
+ * travelling glow across the number and bolt only. The lockscreen copy remains
+ * the source of the geometry; keep the two in sync by hand.
  */
 Item {
     id: root
@@ -70,64 +70,59 @@ Item {
             Behavior on color { ColorAnimation { duration: 300 } }
         }
 
-        //* Charging overlay: % + bolt, kept at full opacity so the number
-        //* stays legible. The glow below is a separate body sweep rather than
-        //* the lockscreen's text-only dim/bright sheen, which had to drop the
-        //* base row to 55% opacity to be visible.
+        //* Charging overlay: % + bolt, kept bright so the number stays legible.
+        //* The sheen below is a travelling glow clipped to the text only — the
+        //* body and fill never shimmer.
         Item {
             id: chargeShimmer
 
             anchors.centerIn: parent
             width: chargeBase.implicitWidth
             height: chargeBase.implicitHeight
-            visible: root.sheenActive && root.charging && root.showPercent
+            visible: root.charging && root.showPercent
             z: 2
 
-            ChargeRow {
+            MiniBatteryChargeRow {
                 id: chargeBase
 
                 anchors.centerIn: parent
                 u: root.s
                 value: root.pct
                 tint: root.inkColor
+                opacity: 0.9
             }
-        }
 
-        Item {
-            id: sheenClip
+            Item {
+                id: sheenMover
 
-            anchors.fill: parent
-            clip: true
-            visible: root.sheenActive && root.charging
-            z: 3
-
-            Rectangle {
-                id: sheenBand
-
-                property real sweepX: -width
-
-                x: sheenBand.sweepX
-                width: body.width * 0.6
+                width: Math.max(20 * root.s, chargeShimmer.width * 0.55)
                 height: body.height
-                antialiasing: true
+                visible: root.sheenActive
 
-                gradient: Gradient {
-                    orientation: Gradient.Horizontal
-                    GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0) }
-                    GradientStop { position: 0.5; color: Qt.rgba(1, 1, 1, 0.6) }
-                    GradientStop { position: 1.0; color: Qt.rgba(1, 1, 1, 0) }
+                Item {
+                    anchors.fill: parent
+                    clip: true
+
+                    MiniBatteryChargeRow {
+                        y: (height - implicitHeight) / 2
+                        x: (chargeShimmer.width - implicitWidth) / 2 - sheenMover.x
+                        u: root.s
+                        value: root.pct
+                        tint: root.inkColor
+                        glow: true
+                    }
                 }
 
-                SequentialAnimation on sweepX {
+                SequentialAnimation on x {
                     loops: Animation.Infinite
-                    running: root.sheenActive && root.charging
+                    running: root.sheenActive
 
-                    PauseAnimation { duration: 300 }
+                    PauseAnimation { duration: 250 }
 
                     NumberAnimation {
-                        from: -sheenBand.width
-                        to: sheenClip.width
-                        duration: 1500
+                        from: -sheenMover.width
+                        to: chargeShimmer.width
+                        duration: 1800
                         easing.type: Easing.Linear
                     }
                 }
@@ -151,7 +146,7 @@ Item {
             anchors.centerIn: parent
             u: root.s
             tint: root.inkColor
-            visible: root.sheenActive && root.charging && !root.showPercent
+            visible: root.charging && !root.showPercent
             z: 2
         }
     }
@@ -168,30 +163,4 @@ Item {
         Behavior on color { ColorAnimation { duration: 300 } }
     }
 
-    //* One % + bolt row for the charging state.
-    component ChargeRow: Row {
-        id: chargeRow
-
-        property real u: 1
-        property int value: 0
-        property color tint: Theme.cream
-
-        spacing: 2 * chargeRow.u
-
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: 0.8 * chargeRow.u
-            text: chargeRow.value + ""
-            color: chargeRow.tint
-            font.family: Theme.font
-            font.pixelSize: 12 * chargeRow.u
-            font.weight: Font.DemiBold
-        }
-
-        MiniBatteryBolt {
-            anchors.verticalCenter: parent.verticalCenter
-            u: chargeRow.u
-            tint: chargeRow.tint
-        }
-    }
 }
