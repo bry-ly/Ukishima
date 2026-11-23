@@ -22,6 +22,7 @@ Explore the animated showcase, features and settings on the [Ukishima website](h
 - **Surfaces** — launcher, emoji, weather, calendar, media player, mixer, wallpaper browser and Wallhaven search, screen recorder, clipboard, Wi-Fi (with a scannable share QR), Bluetooth, battery, power menu, system monitor and scratchpad.
 - **Surface styles** — the pill, media player, mixer, system monitor, scratchpad and lock screen each offer several layouts, under **Settings → Appearance → Surface Styles**. The Status pill face also has a **Battery percentage** switch for the number inside its battery.
 - **On-screen display** — volume, brightness and workspace changes flash a centred capsule. **Settings → Interface → Workspace OSD** controls it: **Auto** hides the workspace flash while the Status pill face already shows the workspace bars, **Always** keeps it on every switch, and **Off** disables it.
+- **AI usage** — a **智 AI USAGE** surface in the pill reads OpenCode's Go plan meters and local token totals, refreshed every 15 minutes. The hover-row chip is toggled under **Settings → Bar & Island → Modules → AI usage**.
 - **Wallpapers** — shuffled image wallpapers through `awww`, video wallpapers through `mpvpaper`, a cover/contain/stretch/center fit, and a palette taken from the current wallpaper.
 - **Compositor-aware** — workspaces, window state, keyboard layout, lock backends and dependency checks follow Hyprland or niri. Hyprland-only features are hidden on niri.
 - **Extras** — night light (Hyprland), game mode, keep-awake and an in-app updater.

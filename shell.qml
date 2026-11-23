@@ -387,6 +387,12 @@ ShellRoot {
             WifiShare.toggle(m, "");
         }
 
+        /** Open or close the AI subscription usage surface. */
+        function aiUsage(mon: string): void {
+            const m = (mon && mon.length > 0) ? mon : Wm.focusedScreenName();
+            root.toggleSurface(m, "aiUsage");
+        }
+
         /**
          * Memory saver door: drop every closed surface on every monitor right
          * away, regardless of how much of its 30s tail is left. The open

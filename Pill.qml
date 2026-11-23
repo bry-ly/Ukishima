@@ -162,6 +162,7 @@ Item {
     readonly property bool batteryOpen: surface === "battery"
     readonly property bool recorderOpen: surface === "recorder"
     readonly property bool sysmonOpen: surface === "sysmon"
+    readonly property bool aiUsageOpen: surface === "aiUsage"
     readonly property bool appearanceOpen: surface === "appearance"
     readonly property bool appcatOpen: surface === "appcat"
     readonly property bool displayOpen: surface === "display"
@@ -399,6 +400,7 @@ Item {
     readonly property real btW: 286 * s
     readonly property real recorderW: 384 * s
     readonly property real sysmonW: 392 * s
+    readonly property real aiUsageW: 392 * s
     readonly property real settingsScale: 0.9
     readonly property real settingsW: 392 * s * settingsScale
     readonly property real profileW: 620 * s * settingsScale
@@ -467,6 +469,7 @@ Item {
         battery:   { size: () => Qt.size(batteryW, surfaceItem("battery").implicitHeight + 26 * s), ame: () => surfaceItem("battery") },
         recorder:  { size: () => Qt.size(recorderW, surfaceItem("recorder").implicitHeight + 33 * s), ame: () => surfaceItem("recorder") },
         sysmon:    { size: () => Qt.size(sysmonW, surfaceItem("sysmon").implicitHeight + 33 * s), ame: () => surfaceItem("sysmon") },
+        aiUsage:   { size: () => Qt.size(aiUsageW, surfaceItem("aiUsage").implicitHeight + 33 * s), ame: () => surfaceItem("aiUsage") },
         appearance: { size: () => Qt.size(settingsW, surfaceItem("appearance").implicitHeight + 29 * s), ame: () => surfaceItem("appearance") },
         appcat:     { size: () => Qt.size(settingsW, surfaceItem("appcat").implicitHeight + 29 * s), ame: () => surfaceItem("appcat") },
         surfacestyles: { size: () => Qt.size(settingsW, surfaceItem("surfacestyles").implicitHeight + 29 * s), ame: () => surfaceItem("surfacestyles") },
@@ -511,6 +514,7 @@ Item {
         battery:    () => ldBattery,
         recorder:   () => ldRecorder,
         sysmon:     () => ldSysmon,
+        aiUsage:    () => ldAiUsage,
         appearance: () => ldAppearance,
         appcat:     () => ldAppcat,
         display:    () => ldDisplay,
@@ -2818,6 +2822,58 @@ Item {
                 }
 
                 Item {
+                    id: aiIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Flags.pillShowAi && AiUsage.hasProviders
+                    width: 17 * pill.s
+                    height: 17 * pill.s
+
+                    GlyphIcon {
+                        anchors.fill: parent
+                        name: "sparkles"
+                        color: aiArea.containsMouse ? Theme.cream : Theme.iconDim
+                        stroke: 1.7
+                    }
+
+                    Rectangle {
+                        visible: AiUsage.topLimit >= 0
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.topMargin: -2 * pill.s
+                        anchors.rightMargin: -4 * pill.s
+                        width: Math.max(12 * pill.s, aiBadge.implicitWidth + 4 * pill.s)
+                        height: 10 * pill.s
+                        radius: 3 * pill.s
+                        color: Theme.frameBg
+                        border.width: 1
+                        border.color: AiUsage.topLimit >= 0.9 ? Theme.verm
+                            : (AiUsage.topLimit >= 0.7 ? Theme.flameGlow : Theme.hair)
+
+                        Text {
+                            id: aiBadge
+                            anchors.centerIn: parent
+                            text: Math.round(Math.max(0, AiUsage.topLimit) * 100)
+                            color: AiUsage.topLimit >= 0.9 ? Theme.verm
+                                : (AiUsage.topLimit >= 0.7 ? Theme.flameGlow : Theme.vermLit)
+                            font.family: Theme.font
+                            font.pixelSize: 6.5 * pill.s
+                            font.weight: Font.Bold
+                            font.features: { "tnum": 1 }
+                        }
+                    }
+
+                    MouseArea {
+                        id: aiArea
+                        anchors.fill: parent
+                        anchors.margins: -6 * pill.s
+                        hoverEnabled: true
+                        enabled: hover.live
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: pill.requestSurface("aiUsage")
+                    }
+                }
+
+                Item {
                     id: recorderIcon
                     anchors.verticalCenter: parent.verticalCenter
                     visible: Flags.pillShowRecorder
@@ -3349,6 +3405,18 @@ sourceComponent: Media {
         sourceComponent: SysmonSurface {
             s: pill.s
             open: pill.sysmonOpen
+            morphCloseness: pill.morphCloseness
+            onRequestClose: pill.requestClose()
+        }
+    }
+
+    Loader {
+        id: ldAiUsage
+        active: false
+        anchors.fill: parent
+        sourceComponent: AiUsageSurface {
+            s: pill.s
+            open: pill.aiUsageOpen
             morphCloseness: pill.morphCloseness
             onRequestClose: pill.requestClose()
         }

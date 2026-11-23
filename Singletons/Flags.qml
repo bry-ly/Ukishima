@@ -132,6 +132,8 @@ Singleton {
     property alias pillShowEmoji: adapter.pillShowEmoji
     property alias pillShowPower: adapter.pillShowPower
     property alias pillShowTimer: adapter.pillShowTimer
+    //* Hover-row AI usage chip: plan limits and local token totals for the agents in use.
+    property alias pillShowAi: adapter.pillShowAi
     //* File tray icon in the hover row: files kept by reference, dragged out into apps.
     property alias pillShowFileTray: adapter.pillShowFileTray
 
@@ -283,6 +285,7 @@ Singleton {
             property bool pillShowEmoji: true
             property bool pillShowPower: true
             property bool pillShowTimer: true
+            property bool pillShowAi: true
             property bool pillShowFileTray: true
             //* Session lock: show the avatar above the username on lockscreen/LockSurface.qml.
             property bool lockShowAvatar: true

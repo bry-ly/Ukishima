@@ -22,7 +22,7 @@ SettingsPage {
             { item: dockRow, kind: "toggle", get: function () { return Flags.dockEnabled; }, set: function (v) { Flags.dockEnabled = v; } }
         );
         var mods = [
-            [sysmonRow, "pillShowSysmon"], [recRow, "pillShowRecorder"], [timerRow, "pillShowTimer"],
+            [sysmonRow, "pillShowSysmon"], [aiRow, "pillShowAi"], [recRow, "pillShowRecorder"], [timerRow, "pillShowTimer"],
             [wallRow, "pillShowWallpaper"], [scratchRow, "pillShowScratch"], [launchRow, "pillShowLauncher"],
             [emojiRow, "pillShowEmoji"], [trayRow, "pillShowFileTray"], [powerRow, "pillShowPower"]
         ];
@@ -140,6 +140,14 @@ SettingsPage {
             label: "System monitor"
 
             SettingsSwitch { on: Flags.pillShowSysmon; onToggled: Flags.pillShowSysmon = !Flags.pillShowSysmon }
+        }
+        SettingsCardRow {
+            id: aiRow
+            surface: root
+            label: "AI usage"
+            sub: "OpenCode plan limits and token totals"
+
+            SettingsSwitch { on: Flags.pillShowAi; onToggled: Flags.pillShowAi = !Flags.pillShowAi }
         }
         SettingsCardRow {
             id: recRow
