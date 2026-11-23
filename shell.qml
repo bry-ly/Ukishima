@@ -200,6 +200,56 @@ ShellRoot {
     }
 
     /**
+     * Old pill-surface names mapped to the standalone window's flat page ids.
+     * The in-pill settings tree no longer opens as a surface, but its names are
+     * still reachable from the right-click walk, `qs ipc call ukishima page`,
+     * and any existing keybind, so they are translated here rather than left
+     * pointing at a surface that is no longer used.
+     */
+    readonly property var settingsPageBySurface: ({
+        appearance: "appearance",
+        appcat: "appearance",
+        display: "barIsland",
+        modules: "barIsland",
+        theme: "themeDetails",
+        accent: "accentEditor",
+        glass: "appearance",
+        fontcolor: "fontColorEditor",
+        interface: "interface",
+        rightclick: "rightClickDetails",
+        fontpicker: "fontPicker",
+        locksettings: "lockDetails",
+        update: "updateDetails",
+        profile: "profileDetails",
+        surfacestyles: "appearance",
+        dockSettings: "dock",
+        dockBehavior: "dock",
+        dockAppearance: "dockThemeDetails",
+        dockApps: "dockApps",
+        dockMotion: "dock",
+
+        barIsland: "barIsland",
+        motion: "motion",
+        lock: "lock",
+        dock: "dock",
+        systemSettings: "systemSettings",
+        themeDetails: "themeDetails",
+        accentEditor: "accentEditor",
+        fontColorEditor: "fontColorEditor",
+        fontPicker: "fontPicker",
+        rightClickDetails: "rightClickDetails",
+        lockDetails: "lockDetails",
+        dockThemeDetails: "dockThemeDetails",
+        updateDetails: "updateDetails",
+        profileDetails: "profileDetails"
+    })
+
+    function settingsPageFor(surface) {
+        var page = root.settingsPageBySurface[surface];
+        return page === undefined ? "" : page;
+    }
+
+    /**
      * Per-monitor active workspace, minimized toplevels and monitor hotplug are
      * tracked by the provider's own event subscription; the shell keeps only
      * this entry point for keybind/IPC refreshes.
@@ -207,6 +257,12 @@ ShellRoot {
     function toggleSurface(mon, surface) {
         if (!mon || mon.length === 0)
             mon = Wm.focusedScreenName();
+        var settingsPage = root.settingsPageFor(surface);
+        if (settingsPage.length > 0) {
+            root.close();
+            SettingsState.togglePage(mon, settingsPage);
+            return;
+        }
         if (root.openMon === mon && root.openSurface === surface) {
             root.close();
             return;
@@ -294,7 +350,28 @@ ShellRoot {
                 root.toggleSurface(mon, "media");
         }
         function peek(mon: string): void { root.peek(mon); }
-        function hide(): void { root.close(); }
+        function hide(): void {
+            SettingsState.hide();
+            root.close();
+        }
+
+        /**
+         * Standalone settings window. `settings` toggles it on the focused (or
+         * named) monitor and reopens the last page; `settingsPage` also picks a
+         * page id. `page` still works for every old settings-surface name, so a
+         * keybind written before the window existed keeps opening the right
+         * place.
+         */
+        function settings(mon: string): void {
+            const m = (mon && mon.length > 0) ? mon : Wm.focusedScreenName();
+            SettingsState.toggle(m);
+        }
+        function settingsPage(mon: string, page: string): void {
+            const m = (mon && mon.length > 0) ? mon : Wm.focusedScreenName();
+            const raw = (page === "system") ? "systemSettings" : page;
+            const target = root.settingsPageFor(raw);
+            SettingsState.togglePage(m, target.length > 0 ? target : raw);
+        }
 
         /**
          * Memory saver door: drop every closed surface on every monitor right
@@ -438,7 +515,9 @@ ShellRoot {
             readonly property real topGap: 8 * Flags.topGap * s
             readonly property string surface: root.openMon === modelData.name ? root.openSurface : ""
             readonly property bool surfaceOpen: surface.length > 0
-            readonly property bool modal: surfaceOpen || pill.held || pill.quickChoosing || pill.expandLatch || pickerHere
+            /** The standalone settings window is up on this monitor. */
+            readonly property bool settingsHere: SettingsState.open && SettingsState.monitor === modelData.name
+            readonly property bool modal: surfaceOpen || settingsHere || pill.held || pill.quickChoosing || pill.expandLatch || pickerHere
 
             /**
              * True on the one window whose dropdown spawned the centred picker.
@@ -467,12 +546,12 @@ ShellRoot {
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: ((surfaceOpen || pill.quickChoosing || pickerHere)) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: ((surfaceOpen || settingsHere || pill.quickChoosing || pickerHere)) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
             WlrLayershell.namespace: "ukishima"
 
             anchors { top: true; left: true; right: true; bottom: true }
 
-            mask: monFullscreen ? hiddenRegion : (modal && !FileTray.dragging ? fullRegion : (pill.mode === "game" ? pillRegion : (Flags.autoHide ? (pill.revealSession || pill.transientLive ? revealPillRegion : (pill.expanded ? pillRegion : revealRegion)) : pillRegion)))
+            mask: settingsHere ? fullRegion : (monFullscreen ? hiddenRegion : (modal && !FileTray.dragging ? fullRegion : (pill.mode === "game" ? pillRegion : (Flags.autoHide ? (pill.revealSession || pill.transientLive ? revealPillRegion : (pill.expanded ? pillRegion : revealRegion)) : pillRegion))))
             Region { id: hiddenRegion }
 
             /**
@@ -573,7 +652,7 @@ ShellRoot {
                 focus: overlay.surfaceOpen || pill.quickChoosing || overlay.pickerHere
 
                 HoverHandler {
-                    enabled: !overlay.surfaceOpen && !pill.pinned
+                    enabled: !overlay.surfaceOpen && !overlay.settingsHere && !pill.pinned
                     onHoveredChanged: {
                         if (enabled) {
                             pill.hovered = hovered;
@@ -581,7 +660,9 @@ ShellRoot {
                     }
                 }
                 Keys.onEscapePressed: {
-                    if (Selector.open) {
+                    if (overlay.settingsHere) {
+                        SettingsState.hide();
+                    } else if (Selector.open) {
                         Selector.close();
                     } else if (pill.wallpaperMenuOpen) {
                         pill.wallpaperMenuClose();
@@ -731,6 +812,24 @@ ShellRoot {
 
                 Pill {
                     id: pill
+                    /**
+                     * Keep the pill above the settings scrim on purpose. The
+                     * settings card starts below it, and every theme/display
+                     * change should be visible on the live pill while the panel
+                     * is open. Without this z the layered pill body happened to
+                     * paint above by accident; making it explicit keeps the
+                     * preview stable if the body's layer changes.
+                     */
+                    z: overlay.settingsHere ? 6000 : 0
+                    /**
+                     * Visible but inert while settings is up: the pill is a live
+                     * preview of theme/display changes, not a second place to
+                     * click. For example, clicking the battery cluster used to
+                     * open its surface over the settings card and dismiss the
+                     * window; `enabled: false` keeps the preview stable without
+                     * hiding it.
+                     */
+                    enabled: !overlay.settingsHere
                     anchors.top: parent.top
                     anchors.topMargin: (pill.stripBar || pill.mode === "game") ? 0 : overlay.topGap
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -747,8 +846,9 @@ ShellRoot {
                     barWindow: overlay
                     surface: overlay.surface
                     forcePinned: root.peekMon === overlay.modelData.name
+                    settingsPreview: overlay.settingsHere
 
-                    opacity: (overlay.monFullscreen && !pill.transientLive) ? 0 : (osdPopup.active ? 0 : 1)
+                    opacity: ((overlay.monFullscreen && !pill.transientLive && !pill.settingsPreview) ? 0 : (osdPopup.active ? 0 : 1))
                     Behavior on opacity {
                         NumberAnimation {
                             duration: Motion.pillMorph
@@ -757,7 +857,7 @@ ShellRoot {
                         }
                     }
                     transform: Translate {
-                        y: ((overlay.monFullscreen && !pill.transientLive) || pill.hidden) ? -(pill.height + overlay.topGap) : 0
+                        y: (((overlay.monFullscreen && !pill.transientLive) || pill.hidden) && !pill.settingsPreview) ? -(pill.height + overlay.topGap) : 0
                         Behavior on y {
                             NumberAnimation {
                                 duration: Motion.pillMorph
@@ -793,6 +893,23 @@ ShellRoot {
                     anchors.fill: parent
                     s: overlay.s
                     active: overlay.pickerHere
+                }
+
+                /**
+                 * The standalone settings window, inside this monitor's overlay
+                 * rather than in a second layer surface. The pill overlay is
+                 * already the top-most input surface on this output; hosting the
+                 * card here keeps it above the pill without depending on layer
+                 * surface creation order, and gives it the same workspace and
+                 * fullscreen handling as every other shell surface. Only the
+                 * host named by SettingsState.monitor is active.
+                 */
+                SettingsWindow {
+                    anchors.fill: parent
+                    z: 5000
+                    s: overlay.s
+                    screenName: overlay.modelData.name
+                    hostActive: SettingsState.monitor === overlay.modelData.name
                 }
             }
 

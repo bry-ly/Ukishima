@@ -101,6 +101,24 @@ Item {
 
     Component.onCompleted: Surfaces.register(pill)
 
+    /**
+     * Settings are a separate surface now, so the pill must let go of every
+     * expansion latch when they open. Otherwise the pill can stay expanded
+     * behind the settings scrim and reappear, still open, when the window is
+     * dismissed. The cog no longer opens a pill surface at all.
+     */
+    Connections {
+        target: SettingsState
+        function onOpenChanged() {
+            if (!SettingsState.open)
+                return;
+            pill.pinned = false;
+            pill.expandLatch = false;
+            pill.hoverLatch = false;
+            pill.revealSession = false;
+        }
+    }
+
     property bool hovered: false
     /**
      * True while a reveal interaction is in flight: the pointer touched the
@@ -113,6 +131,13 @@ Item {
     property bool revealSession: false
     property bool pinned: false
     property bool forcePinned: false
+    /**
+     * The settings window is open on this monitor and keeps the pill as a live
+     * preview. This suppresses auto-hide and the fullscreen retraction, but not
+     * the pill's resting/moving state: settings releases the latches on open,
+     * so the face stays compact and only the theme/display changes move.
+     */
+    property bool settingsPreview: false
     /** Latch held by an explicit Expand click in the media card. Unlike hoverLatch it survives cursor exit, so the expanded pill stays up until the user dismisses it (tap the pill, open a surface, or focus loss). */
     property bool expandLatch: false
 
@@ -179,7 +204,7 @@ Item {
         onTriggered: pill.bootSettled = true
     }
 
-    readonly property bool expanded: surfaceOpen || held || hoverLatch || expandLatch
+    readonly property bool expanded: surfaceOpen || held || hoverLatch || expandLatch || settingsPreview
 
     /**
      * First expansion (hover, latch, held, or any surface) marks weather as
@@ -242,7 +267,7 @@ Item {
      * (with its 350ms grace) is what keeps the pill up while the cursor is near
      * it, so a cursor sitting on the strip's edge cannot bounce it.
      */
-    readonly property bool hidden: Flags.autoHide && !revealSession && !expanded && !dragActive
+    readonly property bool hidden: Flags.autoHide && !revealSession && !expanded && !dragActive && !settingsPreview
         && !transientLive && mode !== "game"
 
     /**
@@ -3082,7 +3107,7 @@ Item {
                         hoverEnabled: true
                         enabled: hover.live
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: pill.requestSurface("appearance")
+                        onClicked: SettingsState.toggle(pill.screenName)
                         onContainsMouseChanged: if (containsMouse) pill.soulTarget = "appearance"
                     }
                 }

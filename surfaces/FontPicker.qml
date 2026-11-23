@@ -22,6 +22,9 @@ SettingsSurface {
 
     property string query: ""
     property int focusIndex: 0
+    /** Height cap for the family list; the settings window raises it because
+     *  the content pane is taller than the pill's surface. */
+    property real listMaxHeight: 280
 
     /**
      * Window position of the last hover event allowed to move the highlight.
@@ -170,7 +173,7 @@ SettingsSurface {
     Item {
         id: listFrame
         width: parent.width
-        height: Math.min(list.contentHeight, 280 * root.s)
+        height: Math.min(list.contentHeight, root.listMaxHeight * root.s)
 
         ListView {
             id: list

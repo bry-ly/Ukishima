@@ -80,9 +80,11 @@ DockPanel {
             glyph: "相"
             title: "APPEARANCE"
             showBack: true
+            visible: root.showHeader
+            height: root.showHeader ? 22 * root.s : 0
         }
 
-        Item { width: 1; height: 10 * root.s }
+        Item { width: 1; height: root.showHeader ? 10 * root.s : 0 }
 
         SettingsRow {
             id: themeRow

@@ -48,6 +48,10 @@ Item {
     /** The dock's palette, handed down by the host that owns it. */
     property var pal: null
 
+    /** Draw the page's own header strip. The standalone settings window turns
+     *  this off and supplies its own page header and sidebar. */
+    property bool showHeader: true
+
     /** Name of the surface to navigate back to when the header back chevron is clicked. */
     property string backSurface: ""
 

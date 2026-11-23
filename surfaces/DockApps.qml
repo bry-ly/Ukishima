@@ -20,6 +20,9 @@ DockPanel {
 
     property string query: ""
     property int focusIndex: 0
+    /** Height cap for the app list; the settings window raises it because the
+     *  content pane is taller than the dock's pop-up panel. */
+    property real listMaxHeight: 260
 
     Component.onCompleted: appSearch.forceActiveFocus()
 
@@ -123,9 +126,11 @@ DockPanel {
             glyph: "品"
             title: "APPS"
             showBack: true
+            visible: root.showHeader
+            height: root.showHeader ? 22 * root.s : 0
         }
 
-        Item { width: 1; height: 6 * root.s }
+        Item { width: 1; height: root.showHeader ? 6 * root.s : 0 }
 
         // Search row
         Item {
@@ -202,7 +207,7 @@ DockPanel {
         Item {
             id: listFrame
             width: parent.width
-            height: Math.min(appList.contentHeight, 260 * root.s)
+            height: Math.min(appList.contentHeight, root.listMaxHeight * root.s)
 
             ListView {
                 id: appList

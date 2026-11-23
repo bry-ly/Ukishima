@@ -33,6 +33,12 @@ PillSurface {
     property string glyph: ""
     property string title: ""
     property bool showBack: true
+    /**
+     * Draw the in-pill header strip. The standalone settings window turns this
+     * off: it has its own page header and sidebar, and keeping the old strip
+     * would repeat the page name and leave a dead back chevron behind.
+     */
+    property bool showHeader: true
     /** Gap under the header; one surface uses 8 instead of 10. */
     property real headerGap: 10 * root.s
 
@@ -111,8 +117,10 @@ PillSurface {
             glyph: root.glyph
             title: root.title
             showBack: root.showBack
+            visible: root.showHeader
+            height: root.showHeader ? 22 * root.s : 0
         }
 
-        Item { width: 1; height: root.headerGap }
+        Item { width: 1; height: root.showHeader ? root.headerGap : 0 }
     }
 }

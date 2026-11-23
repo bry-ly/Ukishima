@@ -1,6 +1,8 @@
 singleton Theme Theme.qml
 singleton Motion Motion.qml
 singleton Flags Flags.qml
+singleton SettingsState SettingsState.qml
+singleton SystemInfo SystemInfo.qml
 singleton Notifs Notifs.qml
 singleton Cliphist Cliphist.qml
 singleton Walls Walls.qml
